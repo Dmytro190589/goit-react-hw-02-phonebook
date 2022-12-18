@@ -1,33 +1,50 @@
 import { Component } from 'react';
-import shortid from 'shortid';
-// import ContactList from './ContactsList/ContactsList';
-import Contacts from './Contacts/Contacts';
-// import Filter from './Filter/Filter';
+import css from './App.module.css';
+import ContactForm from './ContactsForm/ContactsForm';
+import Filter from './Filter/Filter';
+import ContactList from './ContactsList/ContactsList';
 
-class App extends Component {
+export class App extends Component {
   state = {
     contacts: [],
-    name: '',
+    filter: '',
+  };
+  filteredContacts = () => {
+    const { contacts, filter } = this.state;
+    const register = filter.toLowerCase();
+    return contacts.filter(i => i.name.toLowerCase().includes(register));
   };
 
-  addContact = name => {
-    const todo = {
-      id: shortid.generate(),
-      name,
-    };
+  deleteItem = itemId => {
     this.setState(prevState => ({
-      contcts: [todo, ...prevState.contacts],
+      contacts: prevState.contacts.filter(item => item.id !== itemId),
     }));
   };
+
+  filter = data => {
+    this.setState({ filter: data.currentTarget.value });
+  };
+
+  addContact = ({ name, number, id }) => {
+    this.state.contacts.some(e => e.name === name)
+      ? alert(`${name} is already in contacts`)
+      : this.setState(prevState => ({
+          contacts: [{ name, number, id }, ...prevState.contacts],
+        }));
+  };
+
   render() {
     return (
-      <>
-        <h2>Phonebook</h2>
-        <Contacts onSubmit={this.addContact} />
+      <div className={css.form}>
+        <h1>Phonebook</h1>
+        <ContactForm onSubmit={this.addContact} />
         <h2>Contacts</h2>
-        {/* <Filter/>
-       <ContactList/> */}
-      </>
+        <Filter value={this.state.filter} onChange={this.filter} />
+        <ContactList
+          contacts={this.filteredContacts()}
+          onClick={this.deleteItem}
+        />
+      </div>
     );
   }
 }
